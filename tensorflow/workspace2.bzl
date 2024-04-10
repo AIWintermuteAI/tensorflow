@@ -434,6 +434,9 @@ def _tf_repositories():
         patch_file = [
             "//third_party/grpc:generate_cc_env_fix.patch",
             "//third_party/grpc:register_go_toolchain.patch",
+            # copybara:comment_begin(oss-only)
+            "//third_party/grpc:cast_memory_order_to_int.patch",
+            # copybara:comment_end
         ],
         system_link_files = {
             "//third_party/systemlibs:BUILD": "bazel/BUILD",
