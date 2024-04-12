@@ -3070,6 +3070,50 @@ OpFoldResult SquareOp::fold(FoldAdaptor adaptor) {
 }
 
 //===----------------------------------------------------------------------===//
+// MaximumOp
+//===----------------------------------------------------------------------===//
+
+OpFoldResult MaximumOp::fold(FoldAdaptor adaptor) {
+  // Only constant fold for tensor of f32 is implemented.
+  if (!IsF32ShapedType(getLhs().getType()) ||
+      !IsF32ShapedType(getRhs().getType()) || !IsF32ShapedType(getType()))
+    return nullptr;
+
+  auto lhs = adaptor.getLhs().dyn_cast_or_null<DenseElementsAttr>();
+  auto rhs = adaptor.getRhs().dyn_cast_or_null<DenseElementsAttr>();
+  if (lhs && lhs.isSplat()) {
+    APFloat lhs_value = lhs.getSplatValue<APFloat>();
+    lhs_value.changeSign();
+    if (lhs_value.isLargest()) return getRhs();
+  }
+  if (rhs && rhs.isSplat()) {
+    APFloat rhs_value = rhs.getSplatValue<APFloat>();
+    rhs_value.changeSign();
+    if (rhs_value.isLargest()) return getLhs();
+  }
+  return nullptr;
+}
+
+//===----------------------------------------------------------------------===//
+// MinimumOp
+//===----------------------------------------------------------------------===//
+
+OpFoldResult MinimumOp::fold(FoldAdaptor adaptor) {
+  // Only constant fold for tensor of f32 is implemented.
+  if (!IsF32ShapedType(getLhs().getType()) ||
+      !IsF32ShapedType(getRhs().getType()) || !IsF32ShapedType(getType()))
+    return nullptr;
+
+  auto lhs = adaptor.getLhs().dyn_cast_or_null<DenseElementsAttr>();
+  auto rhs = adaptor.getRhs().dyn_cast_or_null<DenseElementsAttr>();
+  if (lhs && lhs.isSplat())
+    if (lhs.getSplatValue<APFloat>().isLargest()) return getRhs();
+  if (rhs && rhs.isSplat())
+    if (rhs.getSplatValue<APFloat>().isLargest()) return getLhs();
+  return nullptr;
+}
+
+//===----------------------------------------------------------------------===//
 // RankOp
 //===----------------------------------------------------------------------===//
 
