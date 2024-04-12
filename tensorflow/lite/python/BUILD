@@ -209,6 +209,7 @@ py_strict_library(
         "//tensorflow/python/framework:importer",
         "//tensorflow/python/framework:ops",
         "//tensorflow/python/framework:versions",
+        "//tensorflow/python/keras:models",
         "//tensorflow/python/platform:gfile",
         "//tensorflow/python/saved_model:load",
         "//tensorflow/python/saved_model:loader",
