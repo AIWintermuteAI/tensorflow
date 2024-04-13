@@ -45,10 +45,10 @@ limitations under the License.
 namespace stream_executor {
 namespace interpreter {
 
-class XlaInterpreterExecutor : public StreamExecutorInterface {
+class XlaInterpreterExecutor : public StreamExecutor {
  public:
-  explicit XlaInterpreterExecutor(int device_ordinal)
-      : device_ordinal_(device_ordinal) {}
+  XlaInterpreterExecutor(int device_ordinal, Platform *platform)
+      : StreamExecutor(platform), device_ordinal_(device_ordinal) {}
 
   absl::Status Init() override { return absl::OkStatus(); }
 
@@ -109,11 +109,6 @@ class XlaInterpreterExecutor : public StreamExecutorInterface {
   absl::Status SynchronousMemcpy(void *host_dst,
                                  const DeviceMemoryBase &dev_src,
                                  uint64_t size) override;
-  absl::Status SynchronousMemcpyDeviceToDevice(DeviceMemoryBase *pop_dst,
-                                               const DeviceMemoryBase &pop_src,
-                                               uint64_t size) override {
-    return absl::Status{absl::StatusCode::kUnimplemented, ""};
-  }
 
   bool HostCallback(Stream *stream,
                     absl::AnyInvocable<absl::Status() &&> callback) override;
