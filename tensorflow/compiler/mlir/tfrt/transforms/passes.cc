@@ -117,6 +117,9 @@ void CreateTFExecutorToTFPreInvariantOptimizationPipelineHelper(
   // Merge non-side-effecting tf.If ops if their operands are the same.
   pm.addPass(tfrt_compiler::CreateMergeTfIfOpsPass());
 
+  pm.addPass(tfrt_compiler::CreateLowerBoundBatchThreadsPass(
+      options.min_num_batch_threads));
+
   // Deduplicate functions invoked by tf.BatchFunction with the same
   // shared_name
   pm.addPass(
