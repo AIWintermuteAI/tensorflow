@@ -62,16 +62,6 @@ using mlir::getAffineBinaryOpExpr;
 using mlir::getAffineConstantExpr;
 using mlir::MLIRContext;
 
-int64_t FloorDiv(int64_t dividend, int64_t divisor) {
-  return dividend / divisor -
-         (((dividend >= 0) != (divisor >= 0) && dividend % divisor) ? 1 : 0);
-}
-
-int64_t CeilDiv(int64_t dividend, int64_t divisor) {
-  return dividend / divisor +
-         (((dividend >= 0) == (divisor >= 0) && dividend % divisor) ? 1 : 0);
-}
-
 class AffineExprSimplifier {
  public:
   explicit AffineExprSimplifier(RangeEvaluator* range_evaluator)
@@ -626,6 +616,16 @@ SmallVector<AffineExpr, 4> MapSymbolsToComposedSymbolsList(
 
 }  // namespace
 
+int64_t FloorDiv(int64_t dividend, int64_t divisor) {
+  return dividend / divisor -
+         (((dividend >= 0) != (divisor >= 0) && dividend % divisor) ? 1 : 0);
+}
+
+int64_t CeilDiv(int64_t dividend, int64_t divisor) {
+  return dividend / divisor +
+         (((dividend >= 0) == (divisor >= 0) && dividend % divisor) ? 1 : 0);
+}
+
 std::string Interval::ToString() const {
   std::stringstream ss;
   Print(ss);
@@ -743,6 +743,12 @@ void IndexingMap::AddConstraint(mlir::AffineExpr expr, Interval range) {
     Interval& current_range = GetMutableSymbolBound(symbol_expr.getPosition());
     current_range = Intersect(current_range, range);
     return;
+  }
+  if (auto constant_expr = mlir::dyn_cast<AffineConstantExpr>(expr)) {
+    if (constant_expr.getValue() >= range.lower &&
+        constant_expr.getValue() <= range.upper) {
+      return;
+    }
   }
   if (SimplifyConstraintRange(&expr, &range)) {
     AddConstraint(expr, range);
